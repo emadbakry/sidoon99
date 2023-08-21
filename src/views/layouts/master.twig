@@ -1,0 +1,801 @@
+{# ############## Shared Variables in all views ################ | Variable | Type | Description |
+|----------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------|
+| store | Store | | | store.id | int | | | store.name | string | | | store.username | string | | | store.description |
+string | | | store.slogan | ?string | * if feature in twilight.json | | store.logo | string | | | store.url | string | |
+| store.api | string | the api url for current store | | store.icon | string | *fav icon url | | store.contacts | object
+| [mobile, phone, email, whatsapp, telegram], ex. store.contacts.email | | store.social | object | [instagram, snapchat,
+twitter, youtube, facebook, pinterest, maroof, whatsapp], ex. store.social.twitter | | store.settings | object | | |
+store.settings.auth.email_allowed | bool | | | store.settings.auth.mobile_allowed | bool | | |
+store.settings.auth.is_email_required | bool | | | store.settings.cart.apply_coupon_enabled | bool | Does visitor
+allowed to applay coupon in cart page | | store.settings.product.total_sold_enabled | bool | | |
+store.settings.product.fit_type | ?string | null when equal product card size is off, or ['cover', 'contain'] | |
+store.settings.category.testimonial_enabled | bool | Show random testimonials in category page | |
+store.settings.tax.number | ?string | | | store.settings.tax.certificate | ?string | certificate image url | |
+store.settings.tax.taxable_prices_enabled | bool | Does tax included in the prices ex product_price 100 & tax is 15,
+price will be 115 | | store.settings.rating_enabled | bool | Is one of: store_enabled or shipping_enabled or
+products_enabled | | store.settings.arabic_numbers_enabled | bool | Does the merchant wants the numbers to be shown as
+Arabic format | | store.settings.is_multilingual | bool | | | store.settings.currencies_enabled | bool | | theme | Theme
+| | | theme.id | int | | | theme.name | string | | | theme.mode | string | `live`, `preview` | | theme.is_rtl | bool | |
+| theme.translations_hash | int | to be used in case merchant updated frontend store translations | | theme.color |
+object | | | theme.color.primary | string | | | theme.color.text | string | suitable text color comparing to
+`theme.primary.color`, #000000, #FFFFFF | | theme.color.reverse_primary | string | | | theme.color.reverse_text | string
+| if `theme.text_color=#000000` means that `theme.reverse_text_color=#FFFFFF` | | theme.color.is_dark | bool | Does main
+store color `theme.primary.color` considered as dim color? | | theme.color.darker(float alpha, ?string hexColor) |
+string | get darker color from `theme.primary.color` or from passed color, `alpha` range from 0.0-1.0 | |
+theme.color.lighter(float alpha, ?string hexColor) | string | get lighter color from `theme.primary.color` or from
+passed color, `alpha` range from 0.0-1.0 | | theme.font | ?object | Salla predefined font, null when the theme doesn't
+have `fonts` feature | | theme.font.name | string | DINNextLTArabic-Regular, Amazon-Ember, Apple, Dubai, Estedad | |
+theme.font.url | string | css full url ex: 'https://my_store.test/dist/fonts/default.css' | | theme.settings | object |
+dynamic object with values of the `settings` in twilight.json ex. `theme.settings.topnav_is_dark` | |
+theme.settings.set(settingName, value) | string | set global var, then get it
+{{ theme.settings.get("my_var", "fallback") }} | | theme.settings.get(settingName, default=null) | mixed | get theme
+setting ex `theme.settings.get('my_var', 'fallback')` | | user | User | Current user/Guest | | user.first_name | string
+| | | user.last_name | string | | | user.avatar | string | | | user.city | ?string | | | user.country | ?string | | |
+user.full_name | string | link:`first_name` `last_name` | | user.mobile | string | | | user.email | string | | |
+user.gender | ?string | 'male', 'female' | | user.birthday | ?data | | | user.type | string | `user`, `guest` | |
+user.country_code | string | ex: "SA" for user or guest | | user.currency_code | string | ex: "SAR" | | user.currency |
+object | | | user.currency.code | string | ex: "SAR" | | user.currency.name | string | ex: "ريال سعودي" | |
+user.currency.symbol | string | ex: "ر.س" | | user.currency.amount | string | ex: "1.0" | | user.currency.country_code |
+string | lower first two letters from currency code ex: "sa" | | user.language_code | string | | | user.language |
+Language | Current user language | | user.language.name | string | | | user.language.is_rtl | bool | | |
+user.language.code | string | ex: ar, en | | user.language.url | string | Current url in this lang | |
+user.language.flag | string | Url of flag for the language | | user.language.country_code | string | ex: Arabic=>sa,
+English=>gb | | user.language.order | int | Sort language in menu | #}
+<!DOCTYPE html>
+<html lang="{{ user.language.code }}" dir="{{ user.language.dir }}">
+	<!-- بسم الله الرحمن الرحيم -->
+
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+		{{
+			theme.settings.set("placeholder", "images/placeholder.png")
+		}}
+		{% hook 'head:start' %} {% hook head %} {% block styles %}{% endblock %}
+		<link rel="stylesheet" href="{{ 'app.css' | asset }}" />
+		<link rel="stylesheet" href="{{ theme.font.path | cdn }}" />
+		<link rel="stylesheet" href="{{ 'fonts/sallaicons.css' | cdn }}" />
+
+		{% if theme.settings.get('fontoutname') and theme.settings.get('fontout') %}
+
+		<link rel="stylesheet" href="{{ 'fonts/sallaicons.css' | cdn }}" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="{{ theme.settings.get('fontout') }}" rel="stylesheet" />
+
+		<style>
+			body {
+				font-family: "{{theme.settings.get(" fontoutname ")}}", sans-serif !important ;
+			}
+		</style>
+
+		{% endif %}
+
+		<style>
+			:root {
+			    --font-main: '{{theme.font.name}}';
+			    --color-primary: {{ theme.color.primary }};
+			    --color-primary-dark: {{ theme.color.darker(0.15) }};
+			    --color-primary-light: {{ theme.color.lighter(0.15) }};
+			    --color-primary-reverse: {{ theme.color.reverse_text }};
+			}
+			/* remove hoverZoomLink class for images */
+			#hzViewer {visibility:hidden !important;}
+		</style>
+		{% if is_page('index') %}
+		<style>
+			/* ---------- header ---------- */
+			.cart-count svg {
+				fill: var(--header-color, #000);
+			}
+			/* add .index later */
+			.store-header {
+				position: fixed;
+				z-index: 2222222;
+				width: 100%;
+			}
+			#mainnav {
+				background: none;
+			}
+			/* make burger icon visible on all devices */
+			#mainnav .mburger {
+				display: block !important;
+			}
+			/* #mobile-menu,
+		.top-navbar .hidden.lg\:flex {
+			display: none !important;
+		} */
+			.mm-ocd__content {
+				z-index: 99999999999;
+			}
+			/* make all header elements and icons with the var header-color */
+			body {
+				--header-color: #fff;
+			}
+			.store-header {
+				transition: 0.2s;
+			}
+			.header-dark {
+				--header-color: #000;
+			}
+			/* add index later */
+			.store-header .s-cart-summary-total,
+			.store-header i {
+				color: var(--header-color, #111);
+			}
+			.store-header .s-cart-summary-icon svg {
+				fill: var(--header-color, #111);
+			}
+			div.s-user-menu-trigger {
+				background-color: transparent;
+			}
+			.header-btn__icon {
+				border-color: var(--header-color, #111);
+			}
+			/* hide header on footer */
+			.hidden-header {
+				opacity: 0;
+				visibility: hidden;
+			}
+			/* hide header on footer */
+			.mm-ocd {
+				z-index: 99999999;
+			}
+			.mm-spn.mm-spn--navbar:after {
+				text-align: center !important;
+				opacity: 1;
+			}
+			.s-cart-summary-wrapper .s-cart-summary-count {
+				right: 0.725rem;
+				top: 0.9rem;
+				width: 1.05rem;
+				height: 1.05rem;
+				font-size: 1rem;
+				color: #000;
+				background-color: var(--header-color, red);
+			}
+			.header-dark .store-header .s-cart-summary-count {
+				color: #fff;
+			}
+			.s-user-menu-trigger-avatar[src*="male"] {
+				content: url(https://media.zid.store/ceb6c4eb-d69d-4224-a170-ba1cb8654ef6/71738ffe-6ac7-42e4-8c09-fcae307fa0e5.svg);
+			}
+			.header-dark .s-user-menu-trigger-avatar[src*="male"] {
+				content: url(https://media.zid.store/ceb6c4eb-d69d-4224-a170-ba1cb8654ef6/17f1644c-72fd-4ad7-9f03-8a3766cc1038.svg);
+			}
+			/* ---------- header ---------- */
+			/* fix a problem of z-index */
+			.swiper-slide-next.swiper-slide-visible {
+				z-index: 3 !important;
+			}
+		</style>
+		<style>
+			.swiper-pagination-bullet {
+				width: 12px;
+				height: 12px;
+			}
+			.slider-big-video {
+				position: absolute;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				z-index: 33;
+			}
+
+			.mySwiper {
+				width: 100%;
+				height: 100vh;
+			}
+
+			.mySwiper .swiper-slide {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.mySwiper2 {
+				width: 100%;
+				height: 100%;
+			}
+
+			.mySwiper2 .swiper-slide {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.swiper-button-next,
+			.swiper-button-prev {
+				color: #fff;
+				font-size: 2rem;
+			}
+
+			.swiper-scrollbar-drag {
+				background-color: #fff;
+				opacity: 0.5;
+			}
+			.mySwiper > .swiper-wrapper > .swiper-slide {
+				transition: all ease 0.4s !important;
+			}
+
+			/* animation of arrows */
+			/* .no-x-swipe-yet .swiper-button-prev:after {
+				animation: ease 0.5s infinite bounceAlpha;
+			} */
+			.swiper-button-down,
+			.used-for-left {
+				position: absolute;
+				z-index: 6;
+				width: 70px;
+				top: 50%;
+				left: 50%;
+				height: 70px;
+				pointer-events: none;
+				transform: translate(-50%, -50%) rotate(180deg) scale(1.2);
+			}
+			.used-for-left {
+				top: 70%;
+				left: 35%;
+				transform: translate(-50%, -50%) rotate(-90deg) scale(1.2);
+			}
+			.arrows {
+				width: 60px;
+				height: 72px;
+				position: absolute;
+				visibility: hidden;
+				left: 50%;
+				margin-left: -30px;
+				bottom: 20px;
+			}
+			.no-y-swipe-yet .arrows:not(.left) {
+				visibility: visible;
+			}
+			.no-x-swipe-yet .used-for-left svg {
+				visibility: visible;
+			}
+			.arrows path {
+				stroke: var(--header-color, #005371);
+				fill: transparent;
+				stroke-width: 1px;
+				animation: arrow 7s infinite;
+				-webkit-animation: arrow 7s infinite;
+			}
+			.used-for-left path {
+				animation: arrow 6s 3s infinite;
+				-webkit-animation: arrow 6s 3s infinite;
+			}
+			@keyframes arrow {
+				0% {
+					opacity: 0;
+				}
+				3% {
+					opacity: 1;
+				}
+				6% {
+					opacity: 0;
+				}
+				10% {
+					opacity: 0;
+				}
+				14% {
+					opacity: 1;
+				}
+				17% {
+					opacity: 0;
+				}
+				20% {
+					opacity: 0;
+				}
+				24% {
+					opacity: 1;
+				}
+				27% {
+					opacity: 0;
+				}
+				100% {
+					opacity: 0;
+				}
+			}
+			@-webkit-keyframes arrow {
+				0% {
+					opacity: 0;
+				}
+				3% {
+					opacity: 1;
+				}
+				6% {
+					opacity: 0;
+				}
+				10% {
+					opacity: 0;
+				}
+				14% {
+					opacity: 1;
+				}
+				17% {
+					opacity: 0;
+				}
+				100% {
+					opacity: 0;
+				}
+			}
+			.arrows path.a1 {
+				animation-delay: -1s;
+				-webkit-animation-delay: -0.6s;
+			}
+
+			.arrows path.a2 {
+				animation-delay: -0.5s;
+				-webkit-animation-delay: -0.3s;
+			}
+
+			.arrows path.a3 {
+				animation-delay: 0s;
+				-webkit-animation-delay: 0s;
+			}
+			/* animation of arrows */
+			.gallery-thumbs {
+				position: absolute;
+				width: auto;
+				min-width: 300px;
+				height: 200px;
+				max-height: 150px;
+				opacity: 1;
+				/* overflow: hidden; */
+				left: 3rem;
+				bottom: 7rem;
+				z-index: 222;
+			}
+			.gallery-thumbs img {
+				max-width: 100%;
+				max-height: 100%;
+				border: 2px solid rgb(236, 214, 214/0.6);
+				pointer-events: none;
+			}
+			.gallery-thumbs .swiper-slide_inner {
+				height: 100%;
+				width: auto;
+				margin: 0.5rem;
+				padding: 0.2rem;
+				box-sizing: border-box;
+			}
+			.swiper-wrapper-2 {
+				height: 100%;
+			}
+
+			.gallery-thumbs .swiper-slide-2 {
+				height: 100%;
+				display: flex;
+				padding: 0 3rem;
+				/* grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); */
+			}
+			.gallery-thumbs .swiper-slide_inner {
+				cursor: pointer;
+				transform: translateZ(0);
+				opacity: 0.9;
+				transition: 0.35s ease-in-out;
+				max-width: 30vw;
+				background-color: #fff;
+			}
+			.gallery-thumbs .swiper-slide_inner.active {
+				opacity: 1;
+				transform: translateY(-20px);
+			}
+			/* bigImg title */
+			/* small image title, shows instead of the snmall image */
+			.gallery-thumbs .swiper-slide_inner[data-title] {
+				position: relative;
+			}
+			.gallery-thumbs .swiper-slide_inner[data-title]:after {
+				content: attr(data-title);
+				color: #000;
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				-webkit-transform: translate(-50%, -50%);
+				transform: translate(-50%, -50%);
+				font-size: 1.4rem;
+				font-weight: 600;
+				color: #fff;
+				text-shadow: 0 0 2px #000;
+				width: 100%;
+				text-align: center;
+			}
+			/* small image title, shows instead of the snmall image */
+			/* up */
+			.slide-img-titles {
+				position: absolute;
+				right: 4rem;
+				top: 15rem;
+				color: var(--header-color, #eee);
+				font-weight: 600;
+				z-index: 3;
+			}
+			/* below */
+			.slide-img-below {
+				position: absolute;
+				z-index: 3;
+				left: 4rem;
+				bottom: 10rem;
+				color: var(--header-color, #eee);
+				font-weight: 600;
+			}
+			/* bigImg title */
+			@media only screen and (max-width: 768px) {
+				.gallery-thumbs {
+					left: 1rem;
+					bottom: 2rem;
+					height: auto;
+				}
+				.gallery-thumbs .swiper-slide_inner.active {
+					transform: translateY(-10px);
+				}
+				.gallery-thumbs .swiper-slide-2 {
+					padding: 0 0rem;
+				}
+				/* show mobile img and hide imgBig */
+				.slider-bigImg {
+					display: none;
+				}
+				.slider-bigImg-phone {
+					display: block !important;
+				}
+				.slider-smallImg {
+					display: block !important;
+				}
+				.gallery-thumbs .swiper-slide_inner[data-title]:after {
+					font-size: 1rem;
+					font-weight: 400;
+				}
+			}
+			@media only screen and (max-width: 1200px) {
+				.gallery-thumbs {
+					left: 2rem;
+					bottom: 3rem;
+					height: auto;
+				}
+			}
+			.slider-bigImg,
+			.slider-bigImg-phone {
+				max-width: unset !important;
+				min-height: 100vh;
+				min-width: 100vw;
+				object-fit: cover;
+			}
+			.swiper-wrapper .swiper-slide {
+				height: 100% !important;
+			}
+			/* --------- footer -------- */
+			.footer-out,
+			.footer--out-container,
+			.footer-out .store-footer {
+				width: 100% !important;
+				height: 100% !important;
+			}
+			.footer-out .store-footer {
+				margin-top: 0 !important;
+				display: flex;
+				align-items: center;
+				justify-content: flex-end;
+				flex-direction: column;
+			}
+			.store-footer__inner {
+				flex-grow: 1;
+				width: 100%;
+				display: flex;
+				padding-right: 2rem;
+				align-items: center;
+			}
+			/* --------- footer -------- */
+		</style>
+		{% endif %} {# tracking services,custom css feature. #} {% hook 'head:end' %}
+	</head>
+
+	<body
+		id="app"
+		class="overflow-x-hidden {% hook 'body:classes' %} bg-gray-50
+  {{ theme.settings.get('footer_is_dark') ? ' footer-is-dark' : ' footer-is-light' }}
+  {{ theme.settings.get('topnav_is_dark') ? ' topnav-is-dark' : '' }}
+  {{ theme.settings.get('sticky_add_to_cart') ? ' is-sticky-product-bar' : '' }}
+  "
+	>
+		<noscript>
+			To get full functionality of this site you need to enable JavaScript. Here is how
+			<a href="https://www.enable-javascript.com/" rel="noreferrer" target="_blank">To enable JavaScript on webpage</a>.
+		</noscript>
+		<div class="app-inner flex flex-col min-h-full">
+			{% hook 'body:start' %} {% component 'header.header' %} {% if is_page('index') %}
+
+			<section class="s-block home-slider s-block--hero-slider s-block--full-bg wide-placeholder">
+				<!-- CSS -->
+				<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+
+				<!-- JavaScript -->
+				<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+				<div class="swiper mySwiper swiper-h">
+					<div class="swiper-wrapper">
+						{% endif %} {% block content %}{% endblock %} {% if is_page('index') %}
+						<div class="swiper-slide footer-out">
+							<!-- Horizontal Slide 2 -->
+							<div class="swiper mySwiper2 swiper-v">
+								<div class="swiper-wrapper">
+									<div class="swiper-slide footer--out-container">
+										<!-- Vertical Slide 1 -->
+										{%component 'footer.footer' %}
+									</div>
+								</div>
+								<div class="swiper-button-next"></div>
+								<div class="swiper-button-prev"></div>
+							</div>
+						</div>
+					</div>
+					<div class="swiper-scrollbar"></div>
+				</div>
+			</section>
+
+			{% endif %}
+		</div>
+		{% if not is_page('index') %} {% component 'footer.footer' %} {% endif %} {% hook 'body:end' %}
+		<script defer src="{{ 'app.js' | asset }}"></script>
+
+		{% if is_page('index') %}
+
+		<script>
+				var mySwiper = new Swiper(".mySwiper", {
+					direction: "vertical",
+					spaceBetween: 0,
+					effect: "creative",
+					autoplay: {
+						delay: {{ theme.settings.get('slidertimervertical') * 1000 }},
+						// disableOnInteraction: true,
+						// pauseOnMouseEnter: true,
+					},
+					creativeEffect: {
+						prev: {
+							// will set `translateZ(-400px)` on previous slides
+							// translate: [0, "-100%", 0],
+						},
+						next: {
+							// will set `translateY(100%)` on next slides
+							translate: [0, "100%", 0],
+							zIndex: 3,
+						},
+					},
+
+					keyboard: {
+						enabled: true,
+						onlyInViewport: false,
+					},
+					mousewheel: {
+						forceToAxis: true,
+						thresholdDelta: 30,
+						// thresholdTime: 300,
+					},
+					threshold: 40,
+					thresholdDelta: 50,
+					normalizeOffsetTop: true,
+					scrollbar: {
+						el: ".swiper-scrollbar",
+						hide: true,
+					},
+
+					navigation: {
+						nextEl: ".swiper-button-down",
+						prevEl: ".swiper-button-up",
+						orientation: "vertical",
+					},
+
+					on: {
+			  setTransition: function () {
+			    // vertical
+			    updateVerticalSwiper();
+			 setTimeout(function () {
+			      updateHeaderColorState();
+			    }, 100);
+			  },
+			  slideChange: function() {
+			    if (this.activeIndex === this.slides.length - 2) {
+			      mySwiper.params.autoplay.reverseDirection = true;
+			      mySwiper.autoplay.start();
+			    }
+			  },
+			  reachBeginning: function() {
+			    this.params.autoplay.reverseDirection = false;
+			  },
+			},
+				});
+				console.log(mySwiper.effect);
+				// horizontal slider
+				var mySwiper2 = new Swiper(".mySwiper2", {
+					direction: "horizontal",
+					spaceBetween: 0,
+					mousewheel: {
+						forceToAxis: true,
+					},
+					threshold: 30,
+					keyboard: {
+						enabled: true,
+						onlyInViewport: false,
+					},
+					// loop: true,
+					autoplay: {
+						delay: {{ theme.settings.get('slidertimerhorizental') * 1000 }} ,
+
+
+						disableOnInteraction: false,
+					},
+					effect: "fade",
+					pagination: {
+			    el: ".swiper-pagination",
+			    clickable: true,
+			  },
+					navigation: {
+						nextEl: ".swiper-button-next",
+						prevEl: ".swiper-button-prev",
+					},
+					slideToClickedSlide: true,
+					on: {
+						slideChange: function () {
+							UpdateActiveSlider();
+						},
+					},
+				});
+
+
+				function updateHeaderColorState() {
+					var activeSwiperDiv = document.querySelector(
+						".mySwiper > div > div.swiper-slide-active .swiper-slide-active img"
+					);
+					if (activeSwiperDiv) {
+						if (activeSwiperDiv.classList.contains("header-dark")) {
+							document.body.classList.add("header-dark");
+						} else {
+							document.body.classList.remove("header-dark");
+						}
+					}
+				}
+				// new code
+				function UpdateActiveSlider() {
+					// remove helper animation class
+					document.body.classList.remove("no-x-swipe-yet");
+					// header-dark handler
+					setTimeout(function () {
+			      updateHeaderColorState();
+			    }, 100);
+					// 	}, 10);
+				}
+				// vertical swiper
+				function updateVerticalSwiper() {
+					// remove helper animation
+					document.body.classList.remove("no-y-swipe-yet");
+					function isThisFooter() {
+						let activeSwiper = document.querySelector(".mySwiper > div > div.swiper-slide-active .swiper-slide-active");
+						if (activeSwiper) {
+							if (activeSwiper.classList.contains("footer--out-container")) {
+								// hide header
+								document.querySelector(".store-header").classList.add("hidden-header");
+							} else {
+								document.querySelector(".store-header").classList.remove("hidden-header");
+							}
+						}
+					}
+					isThisFooter();
+				}
+				// for first load
+				updateVerticalSwiper();
+				UpdateActiveSlider();
+				// show animation for user when not swiping, to let him know that he can swipe
+				document.body.classList.add("no-x-swipe-yet");
+				document.body.classList.add("no-y-swipe-yet");
+		</script>
+
+		<script>
+			// small swiper
+			// var swiper = new Swiper(`.small-swiper`, {
+			// 	navigation: {
+			// 		nextEl: `.swiper-button-next1`,
+			// 		prevEl: `.swiper-button-prev1`,
+			// 	},
+			// 	slidesPerView: 1,
+			// 	spaceBetween: 10,
+			// 	autoplay: 3500,
+			// 	autoplayDisableOnInteraction: false,
+			// 	loop: true,
+			// });
+			let smallSwipers = document.querySelectorAll(".small-swiper");
+			//for loop using i for smallSwipers
+			for (let i = 0; i < smallSwipers.length; i++) {
+				smallSwipers[i].classList.add(`small-swiper${i}`);
+				console.log("smallSwipers[i]");
+				var swiper = new Swiper(`.small-swiper${i}`, {
+					navigation: {
+						nextEl: `.small-swiper${i} .swiper-button-prev1`,
+						prevEl: `.small-swiper${i} .swiper-button-next1`,
+					},
+					slidesPerView: 1,
+					spaceBetween: 10,
+					autoplay: 3500,
+					autoplayDisableOnInteraction: true,
+					loop: true,
+				});
+			}
+
+
+       // stop autoplay when we click buttons in miniswiper
+
+
+    function stopAutoplay(variable1) {
+      mySwiper2[variable1].autoplay.stop();
+      setTimeout(function() {
+        console.log('Autoplay resumed');
+        mySwiper2[variable1].autoplay.start();
+      }, 20000); // 20 seconds delay
+    }
+
+		</script>
+		<style>
+			/* inner small swiper */
+			.small-swiper-outer {
+				width: 70%;
+				max-width: 500px;
+				overflow: hidden;
+				z-index: 35;
+			}
+			/* inner small swiper */
+			.small-swiper-outer .swiper-slide {
+				background: transparent;
+			}
+			.swiper-button-next1,
+			.swiper-button-prev1 {
+				position: absolute;
+				right: 0;
+				top: 50%;
+				transform: translateY(-50%);
+				top: var(--swiper-navigation-top-offset, 50%);
+				/* width: calc(var(--swiper-navigation-size) / 44 * 27);
+				height: var(--swiper-navigation-size);
+				margin-top: calc(0px - (var(--swiper-navigation-size) / 2)); */
+				z-index: 10;
+			}
+			.swiper-button-prev1 {
+				right: unset;
+				left: 0;
+			}
+			.swiper-button-next1:after,
+			.swiper-button-prev1:before {
+				content: "prev";
+				color: #acafc5;
+				font-family: swiper-icons;
+				font-size: calc(var(--swiper-navigation-size) * 0.6);
+				text-transform: none !important;
+				letter-spacing: 0;
+				font-variant: initial;
+				line-height: 1;
+			}
+			.swiper-button-next1:after {
+				content: "next";
+			}
+			.header-dark .swiper-button-next1:after,
+			.header-dark .swiper-button-prev1:before {
+				color: #444;
+			}
+			.small-swiper-outer .swiper-slide a {
+				color: #acafc5;
+				padding: 0.6rem 3rem;
+			}
+			.header-dark .small-swiper-outer .swiper-slide a {
+				color: #000;
+			}
+		</style>
+		{% endif %} {# Twilight Components #}
+		<salla-offer-modal></salla-offer-modal>
+		<salla-search></salla-search>
+
+		{% if user.type=='guest' %}
+		<salla-login-modal></salla-login-modal>
+		{% endif %} {% block scripts %}{% endblock %}
+	</body>
+</html>

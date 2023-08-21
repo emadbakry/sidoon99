@@ -1,0 +1,100 @@
+{# | Variable | Type | Description |
+|---------------------------------|----------|------------------------------------------------------------------------------|
+| component | object | Contains merchant settings for fields from twilight.json `component` section | |
+component.banners | object[] | list of banners | |  component.banners[].image | string | | | component.banners[].url |
+string | | | component.banners[].title | ?string | | | component.banners[].description | ?string | | | position | int |
+Sorting number start from zero | #}
+
+<div class="swiper-slide" data-swiper-autoplay="{{ component.videolenghtvertical * 1000 }}">
+	<!-- Horizontal Slide 2 -->
+	<div class="swiper mySwiper2 swiper-v">
+		<div class="swiper-wrapper">
+			{% for banner in component.banners %}
+
+			<div class="swiper-slide"  data-swiper-autoplay="{{ banner.videolenght * 1000 }}">
+				<!-- Vertical Slide 1 -->
+				<div class="slide-img-titles">
+					<a href="{{ banner.url }}"></a>
+						<h2>{{ banner.title }}</h2>
+						<p>{{ banner.description }}</p>
+					</a>
+				</div>
+
+				<div class="small-swiper-outer absolute left-1/2 bottom-5 -translate-x-1/2">
+					<div class="small-swiper">
+
+						<div class="swiper-wrapper">
+							{% for i in range(1, 12) %} {% if banner['belowtitle' ~ i] %}
+
+							<div class="swiper-slide">
+								<a href="{{ banner['url' ~ i] }}">
+									<h4>{{ banner['belowtitle' ~ i] }}</h4>
+								</a>
+							</div>
+
+							{% endif %} {% endfor %}
+						</div>
+						<div id="stopButton" onclick="stopAutoplay({{position}})" class="swiper-button-next1"></div>
+						<div id="stopButton" onclick="stopAutoplay({{position}})" class="swiper-button-prev1"></div>
+					</div>
+				</div>
+
+				{% if banner.video %}
+
+				<video alt="{{ banner.alt_text }}" class="slider-big-video" autoplay muted loop playsinline
+					defaultmuted>
+					<source src="{{ banner.video }}" media="(min-width: 768px)" />
+					<source src="{{ banner.videomobile }}" media="(max-width: 767px)" />
+				</video>
+
+				<img class="slider-bigImg {% if banner.darkimage == 1 %}header-dark{% endif %}" src="{{ banner.image }}"
+					alt="{{ banner.alt_text }}" />
+
+				{% else %}
+
+				<img class="slider-bigImg {% if banner.darkimage == 1 %}header-dark{% endif %}" src="{{ banner.image }}"
+					alt="{{ banner.alt_text }}" />
+				<img style="display: none" class="slider-bigImg-phone" src="{{ banner.phoneimage }}"
+					alt="{{ banner.alt_text }}" />
+
+				{% endif %}
+			</div>
+			{% endfor %}
+		</div>
+		<div class="swiper-button-next"></div>
+		<div class="swiper-button-prev"></div>
+		<div class="swiper-pagination"></div>
+
+		<div class="swiper-button-down">
+			<svg class="arrows">
+				<path class="a1" d="M0 0 L30 32 L60 0"></path>
+				<path class="a2" d="M0 20 L30 52 L60 20"></path>
+				<path class="a3" d="M0 40 L30 72 L60 40"></path>
+			</svg>
+		</div>
+		<div class="swiper-button-up used-for-left">
+			<svg class="arrows left">
+				<path class="a1" d="M0 0 L30 32 L60 0"></path>
+				<path class="a2" d="M0 20 L30 52 L60 20"></path>
+				<path class="a3" d="M0 40 L30 72 L60 40"></path>
+			</svg>
+		</div>
+	</div>
+
+	{#
+	<div class="swiper-container-2 gallery-thumbs">
+		<div class="swiper-wrapper-2">
+			<div class="swiper-slide-2">
+				{% for banner in component.banners %}
+
+				<div data-title="{{ banner.title }}" class="swiper-slide_inner">
+					<!-- Vertical Slide 1 -->
+					<img src="{{ banner.image }}" alt="banner.alt" />
+				</div>
+
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+	#}
+</div>

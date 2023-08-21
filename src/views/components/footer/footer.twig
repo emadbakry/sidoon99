@@ -1,0 +1,106 @@
+<footer class="store-footer">
+	<!-- Meta Pixel Code -->
+	<script>
+		!(function (f, b, e, v, n, t, s) {
+			if (f.fbq) return;
+			n = f.fbq = function () {
+				n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+			};
+			if (!f._fbq) f._fbq = n;
+			n.push = n;
+			n.loaded = !0;
+			n.version = "2.0";
+			n.queue = [];
+			t = b.createElement(e);
+			t.async = !0;
+			t.src = v;
+			s = b.getElementsByTagName(e)[0];
+			s.parentNode.insertBefore(t, s);
+		})(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+		fbq("init", "167046859655064");
+		fbq("track", "PageView");
+	</script>
+	<noscript
+		><img
+			height="1"
+			width="1"
+			style="display: none"
+			src="https://www.facebook.com/tr?id=167046859655064&ev=PageView&noscript=1"
+	/></noscript>
+	<!-- End Meta Pixel Code -->
+
+	<div aria-label="footer" class="store-footer__inner">
+		<div class="container grid grid-col-1 lg:grid-cols-6 gap-8 lg:gap-6">
+			<div class="lg:col-span-2 rtl:lg:pl-20 ltr:lg:pr-20">
+				<a href="{{ link('/') }}" class="flex items-center m-0">
+					<h3>{{ store.name }}</h3>
+				</a>
+				{% if store.description %}
+				<p class="max-w-sm leading-6 mb-6">
+					{{ store.description | raw }}
+				</p>
+				{% endif %}
+
+				<div class="hidden lg:block">{% component 'footer.social' %}</div>
+
+				{# vat #} {% if store.settings.tax.number %}
+				<div class="flex rtl:space-x-reverse space-x-2 items-end">
+					{% if store.settings.tax.certificate %}
+					<a
+						onclick="document.querySelector('#modal-value-tax').open(); event.preventDefault();"
+						href="#/"
+						alt="{{ store.settings.tax.number }}"
+					>
+						<img
+							width="100%"
+							height="100%"
+							src="{{ 'images/s-empty.png' | asset }}"
+							data-src="{{ 'images/tax.png' | cdn }}"
+							class="lazy w-10 rounded-sm hover:opacity-80 transition-opacity"
+							alt="value added tax"
+						/>
+					</a>
+					{% endif %}
+					<div>
+						<p class="text-sm text-text-grey mb-1">{{ trans("common.elements.tax_number") }}</p>
+						<b class="text-sm">{{ store.settings.tax.number }}</b>
+					</div>
+				</div>
+
+				{% if store.settings.tax.certificate %}
+				<salla-modal
+					sub-title-first
+					sub-title="{{ trans('common.elements.tax_number') }}"
+					modal-title="{{ store.settings.tax.number }}"
+					id="modal-value-tax"
+				>
+					<div class="flex justify-center max-w-full">
+						<img
+							class="w-full"
+							loading="lazy"
+							src="{{ store.settings.tax.certificate }}"
+							alt="{{ store.settings.tax.number }}"
+						/>
+					</div>
+				</salla-modal>
+				{% endif %} {% endif %}
+			</div>
+
+			{% component 'footer.menu' %}
+
+			<div><div class="lg:hidden ">{% component 'footer.social' %}</div>
+				{% component 'footer.contacts' %}
+
+				
+			</div>
+
+			{% component 'footer.mobile-apps' %}
+		</div>
+	</div>
+
+	<div class="md:flex items-center justify-between py-4 container text-center">
+		<span class="text-sm opacity-75">{% hook copyright %}</span>
+		{% component 'footer.payment-methods' %}
+	</div>
+	<span class="hidden bottom-2 rtl:pl-24 ltr:pr-24"></span>
+</footer>
